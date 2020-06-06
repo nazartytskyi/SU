@@ -1,4 +1,4 @@
-const url = 'ws://8e3860e06bec.ngrok.io' //ws://localhost:8080/
+const url = 'wss://8e3860e06bec.ngrok.io' //ws://localhost:8080/
 let market;
 
 
