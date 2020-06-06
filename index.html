@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div>
+        ID: <span id="id"></span>
+    </div>
+    <br>
+    <input type="number" name="" id="heart-rate">
+</body>
+
+<script>
+    const options = {
+        enableHighAccuracy: true, 
+        maximumAge: 30000, 
+        timeout: 27000
+    };
+    const url = 'ws://8e3860e06bec.ngrok.io' 
+    const rate = document.getElementById('heart-rate')
+    const idField = document.getElementById('id')
+
+    window.onload = () => {
+        const ws = new WebSocket(url);
+        const watchID = navigator.geolocation.watchPosition(
+            position => {
+                console.log('Position sent')
+                ws.send(JSON.stringify({
+                    type: 'INFO_UPDATE',
+                    data: {
+                        id,
+                        position: {lat: position.coords.latitude, lng: position.coords.longitude}
+                    }
+                }))
+            },
+            () => alert('Sorry, no position available.'),
+            options
+        );
+
+        rate.oninput = ({target}) => {
+            if (target.value) {
+                ws.send(JSON.stringify({
+                    type: 'INFO_UPDATE',
+                    data: {
+                        id,
+                        heartRate:target.value
+                    }
+                }))
+            }
+        }
+
+        ws.onmessage = ({ data }) => {
+            const message = JSON.parse(data)
+            switch (message.type) {
+                case 'CONNECTED':
+                    console.log('CONNECTED')
+                    ws.send(JSON.stringify({type: 'REGISTER_GADGET'}));
+                    break;
+                case 'REGISTER_GADGET':
+                    id = message.data.id
+                    idField.innerText = id;
+                    break;
+            
+                default:
+                    break;
+            }
+        }
+    }
+</script>
+</html>
